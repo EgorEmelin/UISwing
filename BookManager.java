@@ -1,17 +1,14 @@
 import javax.swing.table.AbstractTableModel;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.jackson.databind.*;
 
 public class BookManager extends AbstractTableModel {
     private List<Book> books = new ArrayList<>();
+    private List<Book> temp = new ArrayList<>();
 
     public BookManager() {
-        books.add(new Book("Назв12daf2ание","Автор", 132, "fdsf", 33,44));
-        books.add(new Book("Назва23dafние","Автор", 132, "fdsf", 33,44));
-        books.add(new Book("Назв123aadfание","Автор", 132, "fdsf", 33,44));
-        books.add(new Book("Назвsfsdание","Автор", 132, "fdsf", 33,44));
-        books.add(new Book("Назваasdgfние","Автор", 132, "fdsf", 33,44));
-        books.add(new Book("Назваsdfgние","Автор", 132, "fdsf", 33,44));
     }
 
     public void addBook(Book b){
@@ -24,7 +21,130 @@ public class BookManager extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    public void changeBook(int index, int attribute, int valueInt, String valueStr)
+    {
+        switch (attribute){
+            case 0:
+                books.get(index).setName(valueStr);
+                break;
+            case 1:
+                books.get(index).setAuthor(valueStr);
+                break;
+            case 2:
+                books.get(index).setTime(valueInt);
+                break;
+            case 3:
+                books.get(index).setPublisher(valueStr);
+                break;
+            case 4:
+                books.get(index).setPages(valueInt);
+                break;
+            case 5:
+                books.get(index).setCount(valueInt);
+                break;
+        }
+        fireTableDataChanged();
+    }
+
+
+    public void searchBook(int attribute, int valueInt, String valueStr){
+        for (int i = 0; i < books.size();i++){
+            temp.add(books.get(i));
+        }
+        books.clear();
+        switch (attribute){
+            case 0:
+                for(Book x: temp) {
+                    if(x.getName().equalsIgnoreCase(valueStr))
+                        books.add(x);
+                }
+                break;
+            case 1:
+                for(Book x: temp) {
+                    if(x.getAuthor().equalsIgnoreCase(valueStr))
+                        books.add(x);
+                }
+                break;
+            case 2:
+                for(Book x: temp) {
+                    if((x.getTime() + " г.").equalsIgnoreCase(valueInt+ " г."))
+                        books.add(x);
+                }
+                break;
+            case 3:
+                for(Book x: temp) {
+                    if(x.getPublisher().equalsIgnoreCase(valueStr))
+                        books.add(x);
+                }
+                break;
+            case 4:
+                for(Book x: temp) {
+                    if(x.getPages() == valueInt)
+                        books.add(x);
+                }
+                break;
+            case 5:
+                for(Book x: temp) {
+                    if(x.getCount() == valueInt)
+                        books.add(x);
+                }
+                break;
+        }
+        fireTableDataChanged();
+    }
+
+    public void showBooks (){
+        if (temp.size()!=0) {
+            books.clear();
+            for (int i = 0; i < temp.size(); i++) {
+                books.add(temp.get(i));
+            }
+            temp.clear();
+        }
+        fireTableDataChanged();
+    }
+
+    public void saveBooks(){
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            for (File myFile : new File("jsons" + System.getProperty("file.separator")).listFiles())
+                if (myFile.isFile()) myFile.delete();
+        }
+        catch (NullPointerException e)
+        {
+            System.out.println("Ошибка удаления");
+        }
+        for (int i = 0; i<books.size(); i++) {
+            String relativePath = "jsons" + System.getProperty("file.separator") + "book" + i + ".json";
+            File file = new File(relativePath);
+            try {
+                mapper.writeValue( new FileOutputStream(relativePath),books.get(i));
+            }
+            catch (IOException e)
+            {
+                System.out.println("Ошибка записи");
+            }
+        }
+    }
+
+    public void openBooks(){
+        ObjectMapper mapper = new ObjectMapper();
+        books.clear();
+        for (File myFile : new File("jsons" + System.getProperty("file.separator")).listFiles()){
+            String relativePath = myFile.getAbsolutePath();
+            try {
+                books.add(mapper.readValue(new FileInputStream(relativePath),Book.class)) ;
+            }
+            catch (IOException e)
+            {
+                System.out.println("Ошибка записи");
+            }
+        }
+        fireTableDataChanged();
+    }
+
     public int getRowCount() {
+        fireTableDataChanged();
         return books.size();
     }
 
@@ -40,7 +160,7 @@ public class BookManager extends AbstractTableModel {
             case 1:
                 return cur.getAuthor();
             case 2:
-                return cur.getTime();
+                return cur.getTime() + " г.";
             case 3:
                 return cur.getPublisher();
             case 4:
@@ -80,7 +200,7 @@ public class BookManager extends AbstractTableModel {
             case 1:
                 return String.class;
             case 2:
-                return String.class;
+                return Integer.class;
             case 3:
                 return String.class;
             case 4:

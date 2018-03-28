@@ -34,8 +34,8 @@ public class Book {
         this.author = author;
     }
 
-    public String getTime() {
-        return time + " г.";
+    public Integer getTime() {
+        return time;
     }
 
     public void setTime(Integer time) {
