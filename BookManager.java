@@ -107,7 +107,7 @@ public class BookManager extends AbstractTableModel {
     public void saveBooks(){
         ObjectMapper mapper = new ObjectMapper();
         try {
-            for (File myFile : new File("jsons" + System.getProperty("file.separator")).listFiles())
+            for (File myFile : new File("src" +System.getProperty("file.separator") +"jsons" + System.getProperty("file.separator")).listFiles())
                 if (myFile.isFile()) myFile.delete();
         }
         catch (NullPointerException e)
@@ -115,7 +115,7 @@ public class BookManager extends AbstractTableModel {
             System.out.println("Ошибка удаления");
         }
         for (int i = 0; i<books.size(); i++) {
-            String relativePath = "jsons" + System.getProperty("file.separator") + "book" + i + ".json";
+            String relativePath = "src" +System.getProperty("file.separator") +"jsons" + System.getProperty("file.separator") + "book" + i + ".json";
             File file = new File(relativePath);
             try {
                 mapper.writeValue( new FileOutputStream(relativePath),books.get(i));
@@ -130,7 +130,7 @@ public class BookManager extends AbstractTableModel {
     public void openBooks(){
         ObjectMapper mapper = new ObjectMapper();
         books.clear();
-        for (File myFile : new File("jsons" + System.getProperty("file.separator")).listFiles()){
+        for (File myFile : new File("src" +System.getProperty("file.separator") +"jsons" + System.getProperty("file.separator")).listFiles()){
             String relativePath = myFile.getAbsolutePath();
             try {
                 books.add(mapper.readValue(new FileInputStream(relativePath),Book.class)) ;
